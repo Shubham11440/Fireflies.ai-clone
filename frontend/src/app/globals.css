@@ -2,22 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #F8FAFC;
+    --foreground: #0E1117;
+    --muted: #F1F5F9;
+    --muted-foreground: #64748B;
+    --border: #E2E8F0;
+    --input: #E2E8F0;
+    --ring: #F6C344;
+    --accent: #F6C344;
+    --accent-foreground: #0E1117;
+    --destructive: #EF4444;
+    --destructive-foreground: #FFFFFF;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: #0E1117;
+    --foreground: #F8FAFC;
+    --muted: #1A1D27;
+    --muted-foreground: #94A3B8;
+    --border: #252830;
+    --input: #252830;
+    --ring: #F6C344;
+    --accent: #F6C344;
+    --accent-foreground: #0E1117;
+    --destructive: #EF4444;
+    --destructive-foreground: #FFFFFF;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+  }
 }
 
 @layer utilities {
