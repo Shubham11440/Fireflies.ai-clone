@@ -1,0 +1,47 @@
+"""Event vocabulary for structured logging."""
+from __future__ import annotations
+
+
+class Events:
+    # Domain events
+    MEETING_CREATED = "MEETING_CREATED"
+    MEETING_DELETED = "MEETING_DELETED"
+    MEETING_UPDATED = "MEETING_UPDATED"
+    TRANSCRIPT_IMPORTED = "TRANSCRIPT_IMPORTED"
+    SUMMARY_STARTED = "SUMMARY_STARTED"
+    SUMMARY_COMPLETED = "SUMMARY_COMPLETED"
+    SUMMARY_FAILED = "SUMMARY_FAILED"
+    ACTION_ITEM_CREATED = "ACTION_ITEM_CREATED"
+    ACTION_ITEM_UPDATED = "ACTION_ITEM_UPDATED"
+
+    # Request events
+    REQUEST_RECEIVED = "REQUEST_RECEIVED"
+    REQUEST_COMPLETED = "REQUEST_COMPLETED"
+
+    # API events
+    GET_MEETINGS = "GET_MEETINGS"
+    GET_MEETING = "GET_MEETING"
+    CREATE_MEETING = "CREATE_MEETING"
+    DELETE_MEETING = "DELETE_MEETING"
+    UPDATE_MEETING = "UPDATE_MEETING"
+    GET_TRANSCRIPT = "GET_TRANSCRIPT"
+    SEARCH_TRANSCRIPT = "SEARCH_TRANSCRIPT"
+    GET_SUMMARY = "GET_SUMMARY"
+    GENERATE_SUMMARY = "GENERATE_SUMMARY"
+    SUMMARY_PROVIDER_CALL = "SUMMARY_PROVIDER_CALL"
+
+
+class EventTypes:
+    API = "api"
+    DB_UPDATE = "db_update"
+    INTERNAL_PROCESS = "internal_process"
+    CLIENT = "client"
+
+
+class Messages:
+    REQUEST_RECEIVED = "Request received"
+    REQUEST_COMPLETED = "Request completed"
+    DB_OPERATION = "Database operation"
+    SERVICE_CALL = "Service call"
+    EXTERNAL_CALL = "External API call"
+    ERROR = "Error occurred"
