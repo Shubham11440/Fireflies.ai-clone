@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, Sparkles } from "lucide-react";
+import { Send, Bot, User, Loader2, Sparkles, AlertTriangle } from "lucide-react";
 import { useChat } from "@/api/queries/useChat";
+import { useLlmStatus } from "@/api/queries/useLlmStatus";
 import type { ChatMessage } from "@/api/chatApi";
 
 interface ChatPanelProps {
@@ -77,6 +78,8 @@ export function ChatPanel({ meetingId }: ChatPanelProps) {
     sendMessage,
   } = useChat(meetingId);
 
+  const { data: llmStatus } = useLlmStatus();
+
   // Auto-scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -116,6 +119,16 @@ export function ChatPanel({ meetingId }: ChatPanelProps) {
           <p className="text-[10px] text-muted-foreground">Ask anything about this meeting</p>
         </div>
       </div>
+
+      {/* Mock provider warning */}
+      {llmStatus?.is_mock && (
+        <div className="flex items-start gap-2 px-4 py-2.5 bg-amber-500/10 border-b border-amber-500/20">
+          <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-700 dark:text-amber-400">
+            Responses are mocked — these are canned answers, not real AI. Set <code className="font-mono bg-amber-500/10 px-1 rounded">LLM_PROVIDER=gemini</code> and <code className="font-mono bg-amber-500/10 px-1 rounded">GEMINI_API_KEY</code> in the backend .env to enable real answers.
+          </p>
+        </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
