@@ -7,6 +7,7 @@ import { useTranscriptSearch } from "@/api/queries/useTranscriptSearch";
 import { useActiveLineTracker } from "@/api/queries/useActiveLineTracker";
 import { usePlayerStore } from "@/stores/playerStore";
 import { useTranscriptSearchStore } from "@/stores/transcriptSearchStore";
+import { useHighlights, useComments } from "@/api/queries/useHighlights";
 import { TranscriptLine } from "./TranscriptLine";
 import { Loader2, ChevronDown } from "lucide-react";
 
@@ -33,6 +34,10 @@ export function TranscriptPanel({ meetingId }: TranscriptPanelProps) {
 
   // Search transcript
   const { data: searchData } = useTranscriptSearch(meetingId, query);
+
+  // Highlights + comments
+  const { data: highlightsData } = useHighlights(meetingId);
+  const { data: commentsData } = useComments(meetingId);
 
   // Build match map: lineId -> [{start, end}]
   const matchMap = useMemo(() => {
@@ -191,6 +196,8 @@ export function TranscriptPanel({ meetingId }: TranscriptPanelProps) {
           {virtualizer.getVirtualItems().map((virtualRow) => {
             const line = allLines[virtualRow.index];
             const highlights = matchMap.get(line.id);
+            const lineHighlight = highlightsData?.items.find((h) => h.line_id === line.id);
+            const lineComments = commentsData?.items.filter((c) => c.line_id === line.id) ?? [];
             return (
               <div
                 key={line.id}
@@ -205,7 +212,13 @@ export function TranscriptPanel({ meetingId }: TranscriptPanelProps) {
                 }}
                 onClick={handleLineClick}
               >
-                <TranscriptLine line={line} searchHighlight={highlights} />
+                <TranscriptLine
+                  line={line}
+                  meetingId={meetingId}
+                  searchHighlight={highlights}
+                  highlight={lineHighlight}
+                  comments={lineComments}
+                />
               </div>
             );
           })}

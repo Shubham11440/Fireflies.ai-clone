@@ -1,7 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { usePlayerStore } from "@/stores/playerStore";
 import type { TranscriptLine as TranscriptLineType } from "@/types";
+import { AnnotationToolbar, COLOR_LEFT_BORDER } from "@/components/bonus/AnnotationToolbar";
+import type { Highlight } from "@/api/highlightsApi";
+import type { Comment } from "@/api/commentsApi";
 
 function formatTimestamp(offset: number | null): string {
   if (offset === null || offset === undefined) return "";
@@ -20,7 +24,6 @@ function getSpeakerColor(speaker: string | null): string {
     "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400",
     "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400",
   ];
-  // Deterministic color from speaker name
   const hash = speaker.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
   return colors[hash % colors.length];
 }
@@ -37,12 +40,22 @@ function getSpeakerInitials(speaker: string | null): string {
 
 interface TranscriptLineProps {
   line: TranscriptLineType;
+  meetingId: string;
   searchHighlight?: { start: number; end: number }[];
+  highlight?: Highlight;
+  comments?: Comment[];
 }
 
-export function TranscriptLine({ line, searchHighlight }: TranscriptLineProps) {
+export function TranscriptLine({
+  line,
+  meetingId,
+  searchHighlight,
+  highlight,
+  comments = [],
+}: TranscriptLineProps) {
   const { activeLineId, seek } = usePlayerStore();
   const isActive = activeLineId === line.id;
+  const [hovered, setHovered] = useState(false);
 
   const handleClick = () => {
     if (line.start_offset !== null) {
@@ -55,7 +68,6 @@ export function TranscriptLine({ line, searchHighlight }: TranscriptLineProps) {
       return line.text;
     }
 
-    // Sort highlights by start position
     const sorted = [...searchHighlight].sort((a, b) => a.start - b.start);
     const parts: React.ReactNode[] = [];
     let lastIndex = 0;
@@ -84,25 +96,32 @@ export function TranscriptLine({ line, searchHighlight }: TranscriptLineProps) {
     return parts;
   };
 
+  // Build left border class based on highlight color
+  const highlightBorderClass = highlight
+    ? `border-l-4 ${COLOR_LEFT_BORDER[highlight.color] ?? "border-l-yellow-400"}`
+    : isActive
+    ? "border-l-2 border-fireflies-yellow"
+    : "border-l-2 border-transparent";
+
   return (
     <div
-      onClick={handleClick}
-      className={`flex gap-3 px-4 py-2.5 cursor-pointer transition-colors duration-150 border-l-2 ${
-        isActive
-          ? "bg-fireflies-yellow/5 border-fireflies-yellow"
-          : "border-transparent hover:bg-muted/50"
-      }`}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={`flex gap-3 px-4 py-2.5 cursor-pointer transition-colors duration-150 ${highlightBorderClass} ${
+        isActive && !highlight ? "bg-fireflies-yellow/5" : ""
+      } ${highlight ? "bg-opacity-10" : "hover:bg-muted/50"}`}
     >
       {/* Speaker avatar */}
       <div
         className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${getSpeakerColor(
           line.speaker
         )}`}
+        onClick={handleClick}
       >
         {getSpeakerInitials(line.speaker)}
       </div>
 
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0" onClick={handleClick}>
         {/* Speaker name + timestamp */}
         <div className="flex items-center gap-2 mb-0.5">
           <span className="text-xs font-semibold text-foreground">
@@ -119,6 +138,19 @@ export function TranscriptLine({ line, searchHighlight }: TranscriptLineProps) {
         <p className="text-sm text-foreground/90 leading-relaxed">
           {renderText()}
         </p>
+      </div>
+
+      {/* Annotation toolbar — appears on hover */}
+      <div
+        className={`shrink-0 transition-opacity ${hovered ? "opacity-100" : "opacity-0"}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <AnnotationToolbar
+          meetingId={meetingId}
+          lineId={line.id}
+          existingHighlight={highlight}
+          commentCount={comments.length}
+        />
       </div>
     </div>
   );
