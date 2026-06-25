@@ -17,7 +17,7 @@ interface SessionState {
   theme: "light" | "dark";
   toasts: Toast[];
   toggleTheme: () => void;
-  addToast: (toast: Omit<Toast, "id">) => void;
+  addToast: (toast: Omit<Toast, "id">) => string;
   removeToast: (id: string) => void;
 }
 
@@ -38,10 +38,13 @@ export const useSessionStore = create<SessionState>((set) => ({
       }
       return { theme: newTheme };
     }),
-  addToast: (toast) =>
+  addToast: (toast) => {
+    const id = Math.random().toString(36).slice(2);
     set((state) => ({
-      toasts: [...state.toasts, { ...toast, id: Math.random().toString(36).slice(2) }],
-    })),
+      toasts: [...state.toasts, { ...toast, id }],
+    }));
+    return id;
+  },
   removeToast: (id) =>
     set((state) => ({
       toasts: state.toasts.filter((t) => t.id !== id),

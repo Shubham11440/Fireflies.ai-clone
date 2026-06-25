@@ -3,6 +3,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { MainNav } from "@/components/nav/MainNav";
 import { Sidebar } from "@/components/nav/Sidebar";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Fireflies Clone",
@@ -25,6 +26,7 @@ export default function RootLayout({
               <main className="flex-1 overflow-y-auto">{children}</main>
             </div>
           </div>
+          <Toaster />
         </Providers>
       </body>
     </html>
