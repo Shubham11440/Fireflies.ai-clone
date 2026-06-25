@@ -1,6 +1,5 @@
 "use client";
 
-import { use } from "react";
 import { useMeeting } from "@/api/queries/useMeeting";
 import { useUpdateMeeting, useDeleteMeeting } from "@/api/queries/useMeetings";
 import { AudioPlayer } from "@/components/transcript/AudioPlayer";
@@ -58,9 +57,9 @@ const speakerColors = [
 export default function MeetingDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = use(params);
+  const { id } = params;
   const { data: meeting, isLoading, error } = useMeeting(id);
   const { matchIds, currentMatchIndex, setQuery, navigateMatch } =
     useTranscriptSearchStore();

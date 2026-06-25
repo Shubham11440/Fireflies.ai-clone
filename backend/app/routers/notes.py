@@ -43,5 +43,6 @@ async def update_notes(meeting_id: str, request: Request):
         notes_markdown=body.get("notes_markdown"),
         notes_json=body.get("notes_json"),
     )
+    await db.commit()
 
     return {"meeting_id": meeting_id, "status": "updated"}

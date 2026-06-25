@@ -43,7 +43,6 @@ async def upsert(db: aiosqlite.Connection, process: SummaryProcess) -> None:
             process.updated_at,
         ),
     )
-    await db.commit()
 
 
 async def update_status(
@@ -86,4 +85,3 @@ async def update_status(
     await db.execute(
         f"UPDATE summary_processes SET {set_clause} WHERE meeting_id = ?", values
     )
-    await db.commit()

@@ -38,6 +38,7 @@ async def generate_summary(meeting_id: str, request: Request, background_tasks: 
         updated_at=now,
     )
     await summary_repo.upsert(db, process)
+    await db.commit()
 
     # Kick off background task
     background_tasks.add_task(run_summary, meeting_id, logger)

@@ -1,12 +1,11 @@
 "use client";
 
-import { use } from "react";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { ChatPanel } from "@/components/bonus/ChatPanel";
 
-export default function ChatPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function ChatPage({ params }: { params: { id: string } }) {
+  const { id } = params;
 
   return (
     <div className="flex flex-col h-full">

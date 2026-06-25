@@ -31,4 +31,3 @@ async def upsert(
         "updated_at=excluded.updated_at",
         (meeting_id, notes_markdown, notes_json, now, now),
     )
-    await db.commit()

@@ -31,6 +31,7 @@ async def run_summary(meeting_id: str, logger: CustomLogger) -> None:
         await summary_repo.update_status(
             db, meeting_id, "processing", start_time=start_time
         )
+        await db.commit()
         logger.info({
             "event": Events.SUMMARY_STARTED,
             "event_type": "internal_process",
@@ -89,6 +90,7 @@ async def run_summary(meeting_id: str, logger: CustomLogger) -> None:
             processing_time=round(elapsed, 3),
             end_time=end_time,
         )
+        await db.commit()
         logger.info({
             "event": Events.SUMMARY_COMPLETED,
             "event_type": "internal_process",
@@ -105,6 +107,7 @@ async def run_summary(meeting_id: str, logger: CustomLogger) -> None:
             error=str(e),
             end_time=end_time,
         )
+        await db.commit()
         logger.error({
             "event": Events.SUMMARY_FAILED,
             "event_type": "internal_process",

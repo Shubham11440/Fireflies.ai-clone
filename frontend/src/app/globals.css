@@ -20,6 +20,8 @@
     --destructive: #EF4444;
     --destructive-foreground: #FFFFFF;
     --radius: 0.5rem;
+    --scrollbar-thumb: rgba(15, 23, 42, 0.15);
+    --scrollbar-thumb-hover: rgba(15, 23, 42, 0.3);
   }
 
   .dark {
@@ -38,6 +40,8 @@
     --accent-foreground: #0E1117;
     --destructive: #EF4444;
     --destructive-foreground: #FFFFFF;
+    --scrollbar-thumb: rgba(248, 250, 252, 0.15);
+    --scrollbar-thumb-hover: rgba(248, 250, 252, 0.3);
   }
 }
 
@@ -48,6 +52,28 @@
   body {
     @apply bg-background text-foreground;
     font-family: Inter, system-ui, -apple-system, sans-serif;
+  }
+
+  /* Custom Scrollbar Styles */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
+
+  /* Firefox Support */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
   }
 }
 

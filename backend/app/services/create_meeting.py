@@ -126,7 +126,7 @@ async def create_meeting(
         await summary_repo.upsert(db, sp)
 
         # Create empty meeting notes
-        await notes_repo.upsert(db, meeting_id, None, None)
+        await notes_repo.upsert(db, meeting_id)
 
         await db.execute("COMMIT")
 
