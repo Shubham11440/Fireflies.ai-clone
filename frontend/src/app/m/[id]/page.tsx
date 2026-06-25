@@ -5,9 +5,11 @@ import { useMeeting } from "@/api/queries/useMeeting";
 import { AudioPlayer } from "@/components/transcript/AudioPlayer";
 import { TranscriptPanel } from "@/components/transcript/TranscriptPanel";
 import { TranscriptSearchBox } from "@/components/transcript/TranscriptSearchBox";
+import { SummaryPanel } from "@/components/summary/SummaryPanel";
 import { useTranscriptSearchStore } from "@/stores/transcriptSearchStore";
-import { ArrowLeft, Clock, Users, Loader2 } from "lucide-react";
+import { ArrowLeft, Clock, Users, Loader2, PanelRightOpen, PanelRightClose } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 function formatDuration(sec: number): string {
   const h = Math.floor(sec / 3600);
@@ -52,6 +54,7 @@ export default function MeetingDetailPage({
   const { data: meeting, isLoading, error } = useMeeting(id);
   const { matchIds, currentMatchIndex, setQuery, navigateMatch } =
     useTranscriptSearchStore();
+  const [showSummary, setShowSummary] = useState(true);
 
   if (isLoading) {
     return (
@@ -78,7 +81,7 @@ export default function MeetingDetailPage({
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="border-b border-border bg-card px-6 py-4">
+      <div className="border-b border-border bg-card px-6 py-4 shrink-0">
         <div className="flex items-center gap-3 mb-3">
           <Link
             href="/"
@@ -104,6 +107,17 @@ export default function MeetingDetailPage({
               )}
             </div>
           </div>
+          <button
+            onClick={() => setShowSummary(!showSummary)}
+            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            title={showSummary ? "Hide summary panel" : "Show summary panel"}
+          >
+            {showSummary ? (
+              <PanelRightClose className="h-4 w-4" />
+            ) : (
+              <PanelRightOpen className="h-4 w-4" />
+            )}
+          </button>
         </div>
 
         {/* Participants */}
@@ -123,7 +137,7 @@ export default function MeetingDetailPage({
       </div>
 
       {/* Audio player */}
-      <div className="px-6 py-3 border-b border-border">
+      <div className="px-6 py-3 border-b border-border shrink-0">
         <AudioPlayer
           mediaUrl={meeting.media_url}
           durationSec={meeting.duration_sec}
@@ -131,7 +145,7 @@ export default function MeetingDetailPage({
       </div>
 
       {/* Search bar */}
-      <div className="px-6 py-2 border-b border-border">
+      <div className="px-6 py-2 border-b border-border shrink-0">
         <TranscriptSearchBox
           onSearch={setQuery}
           matchCount={matchIds.length}
@@ -140,9 +154,19 @@ export default function MeetingDetailPage({
         />
       </div>
 
-      {/* Transcript panel */}
-      <div className="flex-1 overflow-hidden">
-        <TranscriptPanel meetingId={id} />
+      {/* Content area: transcript + summary panel */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Transcript */}
+        <div className="flex-1 overflow-hidden">
+          <TranscriptPanel meetingId={id} />
+        </div>
+
+        {/* Summary panel sidebar */}
+        {showSummary && (
+          <div className="w-[380px] border-l border-border bg-card shrink-0">
+            <SummaryPanel meetingId={id} />
+          </div>
+        )}
       </div>
     </div>
   );

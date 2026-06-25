@@ -1,6 +1,7 @@
 "use client";
 
 import type { SummaryProcessResponse, SummarySection, SummaryBlock } from "@/types";
+import { useGenerateSummary } from "@/api/queries/useSummary";
 import { FileText, Users, CheckCircle, ArrowRight, Lightbulb } from "lucide-react";
 
 function BlockRenderer({ block }: { block: SummaryBlock }) {
@@ -53,14 +54,20 @@ interface SummaryViewProps {
 }
 
 export function SummaryView({ meetingId, summary }: SummaryViewProps) {
+  const generateMutation = useGenerateSummary(meetingId);
+
   if (!summary || summary.status === "none") {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
         <FileText className="h-8 w-8 text-muted-foreground/50 mb-3" />
         <p className="text-sm text-muted-foreground">No summary generated yet.</p>
-        <p className="text-xs text-muted-foreground/60 mt-1">
-          Click &quot;Generate Summary&quot; to create one.
-        </p>
+        <button
+          onClick={() => generateMutation.mutate()}
+          disabled={generateMutation.isPending}
+          className="mt-4 px-4 py-2 rounded-md bg-fireflies-yellow text-fireflies-navy text-sm font-semibold hover:bg-fireflies-yellow/90 disabled:opacity-50 transition-colors"
+        >
+          {generateMutation.isPending ? "Generating…" : "Generate Summary"}
+        </button>
       </div>
     );
   }
@@ -72,6 +79,13 @@ export function SummaryView({ meetingId, summary }: SummaryViewProps) {
           <p className="text-sm font-medium text-destructive">Summary generation failed</p>
           <p className="text-xs text-muted-foreground mt-1">{summary.error}</p>
         </div>
+        <button
+          onClick={() => generateMutation.mutate()}
+          disabled={generateMutation.isPending}
+          className="mt-3 px-4 py-2 rounded-md bg-fireflies-yellow text-fireflies-navy text-sm font-semibold hover:bg-fireflies-yellow/90 disabled:opacity-50 transition-colors"
+        >
+          {generateMutation.isPending ? "Retrying…" : "Retry Generation"}
+        </button>
       </div>
     );
   }
