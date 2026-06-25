@@ -80,3 +80,35 @@ export interface Topic {
   name: string;
   meeting_count?: number;
 }
+
+// ── Summary ─────────────────────────────────────────────────
+export interface SummaryBlock {
+  id: string;
+  type: string;
+  content: string;
+  color?: string;
+}
+
+export interface SummarySection {
+  title: string;
+  blocks: SummaryBlock[];
+}
+
+export interface SummaryResult {
+  meeting_name: string;
+  people: SummarySection;
+  session_summary: SummarySection;
+  action_items: SummarySection;
+  key_decisions: SummarySection;
+  next_steps: SummarySection;
+}
+
+export interface SummaryProcessResponse {
+  meeting_id: string;
+  status: string;
+  provider: string | null;
+  result: SummaryResult | null;
+  error: string | null;
+  chunk_count: number;
+  processing_time: number;
+}
