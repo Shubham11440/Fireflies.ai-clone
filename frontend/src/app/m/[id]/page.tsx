@@ -214,25 +214,21 @@ export default function MeetingDetailPage({
         )}
       </div>
 
-      {/* Edit modal */}
-      {showEdit && (
-        <EditMeetingModal
-          meeting={meeting}
-          isLoading={updateMutation.isPending}
-          onSave={handleEditSave}
-          onClose={() => setShowEdit(false)}
-        />
-      )}
+      <EditMeetingModal
+        meeting={meeting}
+        isLoading={updateMutation.isPending}
+        open={showEdit}
+        onSave={handleEditSave}
+        onClose={() => setShowEdit(false)}
+      />
 
-      {/* Delete confirmation */}
-      {showDelete && (
-        <DeleteConfirmDialog
-          meetingTitle={meeting.title}
-          isLoading={deleteMutation.isPending}
-          onConfirm={handleDeleteConfirm}
-          onClose={() => setShowDelete(false)}
-        />
-      )}
+      <DeleteConfirmDialog
+        meetingTitle={meeting.title}
+        isLoading={deleteMutation.isPending}
+        open={showDelete}
+        onConfirm={handleDeleteConfirm}
+        onClose={() => setShowDelete(false)}
+      />
     </div>
   );
 }

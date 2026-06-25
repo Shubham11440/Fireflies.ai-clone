@@ -1,15 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
 import type { MeetingDetail } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 interface Props {
   meeting: MeetingDetail;
   isLoading: boolean;
+  open: boolean;
   onSave: (data: {
     title?: string;
     occurred_at?: string;
@@ -19,7 +26,13 @@ interface Props {
   onClose: () => void;
 }
 
-export function EditMeetingModal({ meeting, isLoading, onSave, onClose }: Props) {
+export function EditMeetingModal({
+  meeting,
+  isLoading,
+  open,
+  onSave,
+  onClose,
+}: Props) {
   const [title, setTitle] = useState(meeting.title);
   const [occurredAt, setOccurredAt] = useState(
     meeting.occurred_at.slice(0, 16)
@@ -32,12 +45,13 @@ export function EditMeetingModal({ meeting, isLoading, onSave, onClose }: Props)
   );
 
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [onClose]);
+    if (open) {
+      setTitle(meeting.title);
+      setOccurredAt(meeting.occurred_at.slice(0, 16));
+      setDurationMin(String(Math.round(meeting.duration_sec / 60)));
+      setParticipants(meeting.participants.map((p) => p.name).join(", "));
+    }
+  }, [open, meeting]);
 
   const handleSubmit = () => {
     onSave({
@@ -52,21 +66,13 @@ export function EditMeetingModal({ meeting, isLoading, onSave, onClose }: Props)
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Edit Meeting</DialogTitle>
+        </DialogHeader>
 
-      <div className="relative bg-card rounded-lg shadow-lg border border-border w-full max-w-lg mx-4">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h2 className="text-lg font-semibold text-foreground">Edit Meeting</h2>
-          <button
-            onClick={onClose}
-            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="px-6 py-4 space-y-4">
+        <div className="space-y-4 py-2">
           <div className="space-y-1.5">
             <Label>Title</Label>
             <Input
@@ -105,8 +111,8 @@ export function EditMeetingModal({ meeting, isLoading, onSave, onClose }: Props)
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
-          <Button variant="ghost" onClick={onClose}>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
           <Button
@@ -115,8 +121,8 @@ export function EditMeetingModal({ meeting, isLoading, onSave, onClose }: Props)
           >
             {isLoading ? "Saving..." : "Save Changes"}
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
