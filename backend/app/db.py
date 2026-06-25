@@ -3,7 +3,9 @@ from __future__ import annotations
 import aiosqlite
 from pathlib import Path
 
-DB_PATH = Path(__file__).resolve().parent.parent / "fireflies.db"
+from backend.app.config import settings
+
+DB_PATH = Path(settings.DATABASE_PATH)
 
 _pool: aiosqlite.Connection | None = None
 
@@ -15,6 +17,7 @@ async def get_db() -> aiosqlite.Connection:
         _pool.row_factory = aiosqlite.Row
         await _pool.execute("PRAGMA foreign_keys = ON")
         await _pool.execute("PRAGMA journal_mode = WAL")
+        await _pool.execute("PRAGMA busy_timeout = 5000")
     return _pool
 
 
@@ -39,6 +42,17 @@ async def init_db() -> None:
             ("user-default", "Default User", "user@fireflies.local", None, now),
         )
         await db.commit()
+
+    # Auto-seed sample meetings on a fresh/empty database so the app
+    # is never empty after a Render restart or redeploy.
+    cursor = await db.execute("SELECT COUNT(*) as cnt FROM meetings")
+    row = await cursor.fetchone()
+    if row and row["cnt"] == 0:
+        try:
+            from backend.seed import seed_data
+            await seed_data(db)
+        except Exception:
+            pass  # Never block startup if seeding fails
 
 
 async def run_migrations(db: aiosqlite.Connection) -> None:

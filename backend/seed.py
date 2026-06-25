@@ -9,6 +9,8 @@ import json
 import uuid
 from datetime import datetime, timedelta
 
+import aiosqlite
+
 from backend.app.db import get_db, init_db
 from backend.app.repositories import meetings, transcript, participants, topics, chapters, action_items
 from backend.app.models.entities import (
@@ -234,10 +236,8 @@ MEETINGS = [
 ]
 
 
-async def seed():
-    db = await get_db()
-    await init_db()
-
+async def seed_data(db: aiosqlite.Connection) -> None:
+    """Idempotent seed — safe to call on any existing db connection."""
     # ── User ──
     cursor = await db.execute("SELECT id FROM users WHERE id = ?", (USER_ID,))
     if not await cursor.fetchone():
@@ -422,8 +422,15 @@ async def seed():
         await db.commit()
         print(f"  Seeded meeting: {m['title']} ({len(m['transcript'])} lines, {len(m['action_items'])} actions)")
 
-    await db.close()
     print("\nSeed complete!")
+
+
+async def seed():
+    """CLI entry point: init db then seed, then close connection."""
+    db = await get_db()
+    await init_db()
+    await seed_data(db)
+    await db.close()
 
 
 if __name__ == "__main__":

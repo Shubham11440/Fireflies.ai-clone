@@ -18,6 +18,10 @@ class Settings:
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
     LLM_TIMEOUT_SEC: int = int(os.getenv("LLM_TIMEOUT_SEC", "60"))
+    DATABASE_PATH: str = os.getenv(
+        "DATABASE_PATH",
+        str(Path(__file__).resolve().parent.parent / "fireflies.db")
+    )
     CORS_ORIGINS: list[str] = [
         origin.strip()
         for origin in os.getenv(
