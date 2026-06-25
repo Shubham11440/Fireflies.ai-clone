@@ -5,7 +5,7 @@ import { useSummary } from "@/api/queries/useSummary";
 import { SummaryView } from "./SummaryView";
 import { ActionItemsList } from "./ActionItemsList";
 import { ChaptersOutline } from "./ChaptersOutline";
-import { MeetingNotes } from "./MeetingNotes";
+import { StructuredNotesEditor } from "./StructuredNotesEditor";
 import { SummaryStatusBanner } from "./SummaryStatusBanner";
 import { Loader2 } from "lucide-react";
 
@@ -68,7 +68,7 @@ export function SummaryPanel({ meetingId }: SummaryPanelProps) {
               <ChaptersOutline meetingId={meetingId} />
             )}
             {activeTab === "notes" && (
-              <MeetingNotes meetingId={meetingId} />
+              <StructuredNotesEditor meetingId={meetingId} />
             )}
           </>
         )}
