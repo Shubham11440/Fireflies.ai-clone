@@ -112,3 +112,29 @@ export interface SummaryProcessResponse {
   chunk_count: number;
   processing_time: number;
 }
+
+// ── Create / Update Meeting ──────────────────────────────────
+export interface CreateMeetingRequest {
+  title: string;
+  occurred_at: string;
+  duration_sec?: number;
+  source?: string;
+  media_url?: string | null;
+  participant_names?: string[];
+  transcript_content?: string | null;
+  transcript_format?: "txt" | "vtt" | "json";
+}
+
+export interface CreateMeetingResponse {
+  id: string;
+  title: string;
+  transcript_lines: number;
+}
+
+export interface UpdateMeetingRequest {
+  title?: string;
+  occurred_at?: string;
+  duration_sec?: number;
+  media_url?: string | null;
+  participant_names?: string[];
+}
