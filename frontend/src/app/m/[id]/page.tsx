@@ -2,14 +2,17 @@
 
 import { useMeeting } from "@/api/queries/useMeeting";
 import { useUpdateMeeting, useDeleteMeeting } from "@/api/queries/useMeetings";
-import { AudioPlayer } from "@/components/transcript/AudioPlayer";
+import { MediaPlayer } from "@/components/transcript/MediaPlayer";
 import { TranscriptPanel } from "@/components/transcript/TranscriptPanel";
 import { TranscriptSearchBox } from "@/components/transcript/TranscriptSearchBox";
 import { SummaryPanel } from "@/components/summary/SummaryPanel";
 import { EditMeetingModal } from "@/components/meetings/EditMeetingModal";
 import { DeleteConfirmDialog } from "@/components/meetings/DeleteConfirmDialog";
+import { AddMediaPopover } from "@/components/meetings/AddMediaPopover";
 import { ExportButton } from "@/components/bonus/ExportButton";
 import { useTranscriptSearchStore } from "@/stores/transcriptSearchStore";
+import { parseMediaUrl } from "@/lib/media";
+import type { MediaSource } from "@/types";
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -66,6 +69,8 @@ export default function MeetingDetailPage({
   const [showSummary, setShowSummary] = useState(true);
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [showAddMedia, setShowAddMedia] = useState(false);
+  const [localMediaSource, setLocalMediaSource] = useState<MediaSource | null>(null);
   const router = useRouter();
   const updateMutation = useUpdateMeeting();
   const deleteMutation = useDeleteMeeting();
@@ -111,6 +116,16 @@ export default function MeetingDetailPage({
       onSuccess: () => router.push("/"),
     });
   };
+
+  const handleMediaAdded = (url: string, kind: "youtube" | "file") => {
+    if (kind === "file") {
+      setLocalMediaSource({ kind: "file", url, label: "Local file" });
+    } else {
+      setLocalMediaSource(parseMediaUrl(url));
+    }
+  };
+
+  const mediaSource = localMediaSource || parseMediaUrl(meeting.media_url);
 
   return (
     <div className="flex flex-col h-full">
@@ -195,11 +210,12 @@ export default function MeetingDetailPage({
         )}
       </div>
 
-      {/* Audio player */}
+      {/* Media player */}
       <div className="px-6 py-3 border-b border-border shrink-0">
-        <AudioPlayer
-          mediaUrl={meeting.media_url}
+        <MediaPlayer
+          source={mediaSource}
           durationSec={meeting.duration_sec}
+          onAddMedia={() => setShowAddMedia(true)}
         />
       </div>
 
@@ -216,7 +232,7 @@ export default function MeetingDetailPage({
       {/* Content area: transcript + summary panel */}
       <div className="flex-1 overflow-hidden">
         {showSummary ? (
-          <ResizablePanelGroup direction="horizontal" className="h-full">
+          <ResizablePanelGroup orientation="horizontal" className="h-full">
             <ResizablePanel defaultSize={60} minSize={30}>
               <TranscriptPanel meetingId={id} />
             </ResizablePanel>
@@ -247,6 +263,16 @@ export default function MeetingDetailPage({
         onConfirm={handleDeleteConfirm}
         onClose={() => setShowDelete(false)}
       />
+
+      {showAddMedia && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <AddMediaPopover
+            meetingId={id}
+            onMediaAdded={handleMediaAdded}
+            onClose={() => setShowAddMedia(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }

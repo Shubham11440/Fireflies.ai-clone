@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { MeetingDetail } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Video, Link2, Upload } from "lucide-react";
 
 interface Props {
   meeting: MeetingDetail;
@@ -21,6 +22,7 @@ interface Props {
     title?: string;
     occurred_at?: string;
     duration_sec?: number;
+    media_url?: string | null;
     participant_names?: string[];
   }) => void;
   onClose: () => void;
@@ -43,6 +45,10 @@ export function EditMeetingModal({
   const [participants, setParticipants] = useState(
     meeting.participants.map((p) => p.name).join(", ")
   );
+  const [mediaTab, setMediaTab] = useState<"youtube" | "file">("youtube");
+  const [mediaUrl, setMediaUrl] = useState(meeting.media_url ?? "");
+  const [localFile, setLocalFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -50,14 +56,19 @@ export function EditMeetingModal({
       setOccurredAt(meeting.occurred_at.slice(0, 16));
       setDurationMin(String(Math.round(meeting.duration_sec / 60)));
       setParticipants(meeting.participants.map((p) => p.name).join(", "));
+      setMediaUrl(meeting.media_url ?? "");
+      setLocalFile(null);
+      setMediaTab("youtube");
     }
   }, [open, meeting]);
 
   const handleSubmit = () => {
+    const fileUrl = localFile ? URL.createObjectURL(localFile) : undefined;
     onSave({
       title: title.trim() || undefined,
       occurred_at: occurredAt ? new Date(occurredAt).toISOString() : undefined,
       duration_sec: (parseFloat(durationMin) || 0) * 60,
+      media_url: mediaTab === "youtube" ? (mediaUrl.trim() || null) : fileUrl ?? meeting.media_url,
       participant_names: participants
         .split(",")
         .map((p) => p.trim())
@@ -108,6 +119,66 @@ export function EditMeetingModal({
               onChange={(e) => setParticipants(e.target.value)}
               placeholder="Comma-separated names"
             />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>
+              Media <span className="text-muted-foreground font-normal">(optional)</span>
+            </Label>
+            <div className="flex gap-1 bg-muted rounded-md p-0.5">
+              <button
+                type="button"
+                onClick={() => setMediaTab("youtube")}
+                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                  mediaTab === "youtube"
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Link2 className="h-3 w-3" />
+                YouTube link
+              </button>
+              <button
+                type="button"
+                onClick={() => setMediaTab("file")}
+                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                  mediaTab === "file"
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Video className="h-3 w-3" />
+                File
+              </button>
+            </div>
+            {mediaTab === "youtube" ? (
+              <Input
+                value={mediaUrl}
+                onChange={(e) => setMediaUrl(e.target.value)}
+                placeholder="https://youtube.com/watch?v=..."
+              />
+            ) : (
+              <div className="space-y-1">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="video/*,audio/*"
+                  onChange={(e) => setLocalFile(e.target.files?.[0] ?? null)}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full flex items-center justify-center gap-2 py-2 border border-border rounded-md text-sm text-muted-foreground hover:border-fireflies-yellow/50 transition-colors"
+                >
+                  <Upload className="h-4 w-4" />
+                  {localFile ? localFile.name : "Select file"}
+                </button>
+                <p className="text-[11px] text-muted-foreground">
+                  Session-only — plays in browser but won&apos;t be stored on the server.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

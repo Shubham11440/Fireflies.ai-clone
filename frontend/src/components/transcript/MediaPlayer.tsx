@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback, useState } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import ReactPlayer from "react-player";
 import {
   Play,
@@ -29,7 +29,6 @@ export function MediaPlayer({ source, durationSec, onAddMedia }: MediaPlayerProp
   const playerRef = useRef<ReactPlayer>(null);
   const seekRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
-  const [ready, setReady] = useState(false);
 
   const {
     currentTime,
@@ -55,13 +54,6 @@ export function MediaPlayer({ source, durationSec, onAddMedia }: MediaPlayerProp
       player.seekTo(currentTime, "seconds");
     }
   }, [currentTime]);
-
-  useEffect(() => {
-    const player = playerRef.current;
-    if (player) {
-      player.getInternalPlayer()?.playbackRate?.setValue?.(playbackRate);
-    }
-  }, [playbackRate]);
 
   const handleProgress = useCallback(
     (state: { playedSeconds: number }) => {
@@ -178,53 +170,20 @@ export function MediaPlayer({ source, durationSec, onAddMedia }: MediaPlayerProp
 
   return (
     <div className="bg-card border border-border rounded-lg p-4">
-      {/* Hidden player */}
-      <div className="hidden">
+      {/* Single ReactPlayer — visible for video, hidden for audio */}
+      <div className={showVideo ? "relative w-full aspect-video bg-black rounded-md overflow-hidden mb-3" : "sr-only"}>
         <ReactPlayer
           ref={playerRef}
           url={source.url}
+          width="100%"
+          height="100%"
           playing={isPlaying}
           playbackRate={playbackRate}
           onProgress={handleProgress}
           onDuration={handleDuration}
           onEnded={handleEnded}
-          onReady={() => setReady(true)}
-          width="1px"
-          height="1px"
-          config={{
-            file: {
-              attributes: { preload: "metadata" },
-            },
-            youtube: {
-              playerVars: { modestbranding: 1 },
-            },
-          }}
         />
       </div>
-
-      {/* Video viewport */}
-      {showVideo && (
-        <div className="relative w-full aspect-video bg-black rounded-md overflow-hidden mb-3">
-          <ReactPlayer
-            url={source.url}
-            width="100%"
-            height="100%"
-            playing={isPlaying}
-            playbackRate={playbackRate}
-            onProgress={handleProgress}
-            onDuration={handleDuration}
-            onEnded={handleEnded}
-            config={{
-              file: {
-                attributes: { preload: "metadata" },
-              },
-              youtube: {
-                playerVars: { modestbranding: 1 },
-              },
-            }}
-          />
-        </div>
-      )}
 
       {/* Seek bar */}
       <div

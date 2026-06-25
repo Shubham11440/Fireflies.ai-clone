@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import type { CreateMeetingRequest } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Video, Link2, Upload } from "lucide-react";
 
 interface Props {
   isLoading: boolean;
@@ -18,7 +19,10 @@ export function CreateMeetingForm({ isLoading, onSubmit }: Props) {
   );
   const [durationMin, setDurationMin] = useState("60");
   const [participants, setParticipants] = useState("");
+  const [mediaTab, setMediaTab] = useState<"youtube" | "file">("youtube");
   const [mediaUrl, setMediaUrl] = useState("");
+  const [localFile, setLocalFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = () => {
     if (!title.trim()) return;
@@ -74,15 +78,65 @@ export function CreateMeetingForm({ isLoading, onSubmit }: Props) {
         />
       </div>
 
+      {/* Media picker */}
       <div className="space-y-1.5">
         <Label>
-          Media URL <span className="text-muted-foreground font-normal">(optional)</span>
+          Media <span className="text-muted-foreground font-normal">(optional)</span>
         </Label>
-        <Input
-          value={mediaUrl}
-          onChange={(e) => setMediaUrl(e.target.value)}
-          placeholder="https://example.com/recording.mp3"
-        />
+        <div className="flex gap-1 bg-muted rounded-md p-0.5">
+          <button
+            type="button"
+            onClick={() => setMediaTab("youtube")}
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+              mediaTab === "youtube"
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Link2 className="h-3 w-3" />
+            YouTube link
+          </button>
+          <button
+            type="button"
+            onClick={() => setMediaTab("file")}
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+              mediaTab === "file"
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Video className="h-3 w-3" />
+            File
+          </button>
+        </div>
+        {mediaTab === "youtube" ? (
+          <Input
+            value={mediaUrl}
+            onChange={(e) => setMediaUrl(e.target.value)}
+            placeholder="https://youtube.com/watch?v=..."
+          />
+        ) : (
+          <div className="space-y-1">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="video/*,audio/*"
+              onChange={(e) => setLocalFile(e.target.files?.[0] ?? null)}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full flex items-center justify-center gap-2 py-2 border border-border rounded-md text-sm text-muted-foreground hover:border-fireflies-yellow/50 transition-colors"
+            >
+              <Upload className="h-4 w-4" />
+              {localFile ? localFile.name : "Select file"}
+            </button>
+            <p className="text-[11px] text-muted-foreground">
+              Session-only — plays in browser but won&apos;t be stored on the server.
+            </p>
+          </div>
+        )}
       </div>
 
       <Button
