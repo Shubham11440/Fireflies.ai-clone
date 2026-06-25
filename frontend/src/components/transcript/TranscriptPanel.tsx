@@ -3,6 +3,7 @@
 import { useRef, useEffect, useCallback, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useTranscript } from "@/api/queries/useTranscript";
+import { useActiveLineTracker } from "@/api/queries/useActiveLineTracker";
 import { usePlayerStore } from "@/stores/playerStore";
 import { TranscriptLine } from "./TranscriptLine";
 import { Loader2, ChevronDown } from "lucide-react";
@@ -32,6 +33,9 @@ export function TranscriptPanel({
 
   // Flatten all pages into a single array
   const allLines = data?.pages.flatMap((page) => page.lines) ?? [];
+
+  // Track active line from player currentTime (bidirectional sync)
+  useActiveLineTracker(allLines);
 
   const virtualizer = useVirtualizer({
     count: allLines.length,
