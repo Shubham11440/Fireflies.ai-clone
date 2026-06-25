@@ -2,6 +2,7 @@
 
 import { ArrowUpDown } from "lucide-react";
 import { useLibraryStore } from "@/stores/libraryStore";
+import { Select } from "@/components/ui/select";
 
 const sortOptions = [
   { value: "recent", label: "Recent" },
@@ -15,17 +16,17 @@ export function SortControl() {
   return (
     <div className="flex items-center gap-2">
       <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-      <select
+      <Select
         value={sort}
         onChange={(e) => setSort(e.target.value as typeof sort)}
-        className="h-8 rounded-md border border-input bg-background text-sm px-2 focus:outline-none focus:ring-2 focus:ring-ring/20"
+        className="h-8 w-auto text-sm"
       >
         {sortOptions.map((opt) => (
           <option key={opt.value} value={opt.value}>
             {opt.label}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
 }

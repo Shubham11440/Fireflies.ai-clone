@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import type { CreateMeetingRequest } from "@/types";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   isLoading: boolean;
@@ -33,78 +36,62 @@ export function CreateMeetingForm({ isLoading, onSubmit }: Props) {
 
   return (
     <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-foreground mb-1.5">
-          Meeting Title
-        </label>
-        <input
-          type="text"
+      <div className="space-y-1.5">
+        <Label>Meeting Title</Label>
+        <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="e.g. Q3 Planning Meeting"
-          className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1.5">
-            Date & Time
-          </label>
-          <input
+        <div className="space-y-1.5">
+          <Label>Date & Time</Label>
+          <Input
             type="datetime-local"
             value={occurredAt}
             onChange={(e) => setOccurredAt(e.target.value)}
-            className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1.5">
-            Duration (minutes)
-          </label>
-          <input
+        <div className="space-y-1.5">
+          <Label>Duration (minutes)</Label>
+          <Input
             type="number"
             value={durationMin}
             onChange={(e) => setDurationMin(e.target.value)}
             min="1"
-            className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring"
           />
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-foreground mb-1.5">
-          Participants
-        </label>
-        <input
-          type="text"
+      <div className="space-y-1.5">
+        <Label>Participants</Label>
+        <Input
           value={participants}
           onChange={(e) => setParticipants(e.target.value)}
           placeholder="Comma-separated names (e.g. Alice, Bob, Carol)"
-          className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring"
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-foreground mb-1.5">
+      <div className="space-y-1.5">
+        <Label>
           Media URL <span className="text-muted-foreground font-normal">(optional)</span>
-        </label>
-        <input
-          type="text"
+        </Label>
+        <Input
           value={mediaUrl}
           onChange={(e) => setMediaUrl(e.target.value)}
           placeholder="https://example.com/recording.mp3"
-          className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring"
         />
       </div>
 
-      <button
+      <Button
         onClick={handleSubmit}
         disabled={isLoading || !title.trim()}
-        className="w-full h-10 rounded-md bg-fireflies-yellow text-fireflies-navy font-semibold text-sm hover:bg-fireflies-yellow/90 disabled:opacity-50 transition-colors"
+        className="w-full"
       >
         {isLoading ? "Creating..." : "Create Meeting"}
-      </button>
+      </Button>
     </div>
   );
 }

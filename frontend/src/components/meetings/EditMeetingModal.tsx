@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import type { MeetingDetail } from "@/types";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   meeting: MeetingDetail;
@@ -28,7 +31,6 @@ export function EditMeetingModal({ meeting, isLoading, onSave, onClose }: Props)
     meeting.participants.map((p) => p.name).join(", ")
   );
 
-  // Close on Escape
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -51,12 +53,9 @@ export function EditMeetingModal({ meeting, isLoading, onSave, onClose }: Props)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
-      {/* Modal */}
       <div className="relative bg-card rounded-lg shadow-lg border border-border w-full max-w-lg mx-4">
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h2 className="text-lg font-semibold text-foreground">Edit Meeting</h2>
           <button
@@ -67,75 +66,55 @@ export function EditMeetingModal({ meeting, isLoading, onSave, onClose }: Props)
           </button>
         </div>
 
-        {/* Body */}
         <div className="px-6 py-4 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">
-              Title
-            </label>
-            <input
-              type="text"
+          <div className="space-y-1.5">
+            <Label>Title</Label>
+            <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Date & Time
-              </label>
-              <input
+            <div className="space-y-1.5">
+              <Label>Date & Time</Label>
+              <Input
                 type="datetime-local"
                 value={occurredAt}
                 onChange={(e) => setOccurredAt(e.target.value)}
-                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Duration (minutes)
-              </label>
-              <input
+            <div className="space-y-1.5">
+              <Label>Duration (minutes)</Label>
+              <Input
                 type="number"
                 value={durationMin}
                 onChange={(e) => setDurationMin(e.target.value)}
                 min="1"
-                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">
-              Participants
-            </label>
-            <input
-              type="text"
+          <div className="space-y-1.5">
+            <Label>Participants</Label>
+            <Input
               value={participants}
               onChange={(e) => setParticipants(e.target.value)}
               placeholder="Comma-separated names"
-              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring"
             />
           </div>
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
-          <button
-            onClick={onClose}
-            className="px-4 h-9 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          >
+          <Button variant="ghost" onClick={onClose}>
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleSubmit}
             disabled={isLoading || !title.trim()}
-            className="px-4 h-9 rounded-md bg-fireflies-yellow text-fireflies-navy text-sm font-semibold hover:bg-fireflies-yellow/90 disabled:opacity-50 transition-colors"
           >
             {isLoading ? "Saving..." : "Save Changes"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
