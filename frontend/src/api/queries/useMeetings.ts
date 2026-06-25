@@ -8,6 +8,7 @@ import {
 } from "@/api/meetingsApi";
 import type { CreateMeetingRequest, UpdateMeetingRequest } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
+import { useNotificationsStore } from "@/stores/notificationsStore";
 
 export function useMeetings(params: MeetingsQueryParams = {}) {
   return useQuery({
@@ -19,11 +20,17 @@ export function useMeetings(params: MeetingsQueryParams = {}) {
 export function useCreateMeeting() {
   const qc = useQueryClient();
   const { toast } = useToast();
+  const addNotification = useNotificationsStore((s) => s.addNotification);
   return useMutation({
     mutationFn: (req: CreateMeetingRequest) => createMeeting(req),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ["meetings"] });
       toast({ title: "Meeting created", variant: "success" });
+      addNotification({
+        type: "meeting",
+        title: "Meeting imported",
+        message: variables.title,
+      });
     },
     onError: () => {
       toast({ title: "Failed to create meeting", variant: "error" });

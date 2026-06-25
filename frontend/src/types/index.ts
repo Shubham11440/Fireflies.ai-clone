@@ -147,3 +147,15 @@ export interface MediaSource {
   url: string;
   label?: string;
 }
+
+// ── Notifications ─────────────────────────────────────────────
+export interface AppNotification {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  message: string;
+  meeting_id?: string;
+  created_at: string;
+  read: boolean;
+}

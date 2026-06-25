@@ -1,9 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import { fetchSummary, generateSummary, updateSummary } from "@/api/summaryApi";
 import { useToast } from "@/components/ui/use-toast";
+import { useNotificationsStore } from "@/stores/notificationsStore";
 
 export function useSummary(meetingId: string) {
-  return useQuery({
+  const prevStatus = useRef<string | null>(null);
+  const addNotification = useNotificationsStore((s) => s.addNotification);
+
+  const query = useQuery({
     queryKey: ["summary", meetingId],
     queryFn: () => fetchSummary(meetingId),
     enabled: !!meetingId,
@@ -15,6 +20,28 @@ export function useSummary(meetingId: string) {
       return false;
     },
   });
+
+  useEffect(() => {
+    const status = query.data?.status;
+    if (!status) return;
+
+    if (
+      prevStatus.current &&
+      (prevStatus.current === "processing" || prevStatus.current === "pending") &&
+      status === "completed"
+    ) {
+      addNotification({
+        type: "summary",
+        title: "Summary ready",
+        message: query.data?.result?.meeting_name || "Your meeting summary is ready to view",
+        meeting_id: meetingId,
+      });
+    }
+
+    prevStatus.current = status;
+  }, [query.data?.status, meetingId, addNotification, query.data?.result?.meeting_name]);
+
+  return query;
 }
 
 export function useGenerateSummary(meetingId: string) {

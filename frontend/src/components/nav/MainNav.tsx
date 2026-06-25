@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Bell } from "lucide-react";
+import { Search } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { NotificationsDropdown } from "./NotificationsDropdown";
 
 export function MainNav() {
   const pathname = usePathname();
@@ -51,9 +52,7 @@ export function MainNav() {
             <Search className="h-4 w-4" />
           </Link>
           <ThemeToggle />
-          <button className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors relative">
-            <Bell className="h-4 w-4" />
-          </button>
+          <NotificationsDropdown />
           <Link
             href="/settings"
             className="flex items-center justify-center h-8 w-8 rounded-full bg-fireflies-yellow text-fireflies-navy font-bold text-xs"
