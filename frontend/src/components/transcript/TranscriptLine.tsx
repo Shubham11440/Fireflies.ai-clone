@@ -1,0 +1,125 @@
+"use client";
+
+import { usePlayerStore } from "@/stores/playerStore";
+import type { TranscriptLine as TranscriptLineType } from "@/types";
+
+function formatTimestamp(offset: number | null): string {
+  if (offset === null || offset === undefined) return "";
+  const m = Math.floor(offset / 60);
+  const s = Math.floor(offset % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+function getSpeakerColor(speaker: string | null): string {
+  if (!speaker) return "bg-muted text-muted-foreground";
+  const colors = [
+    "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+    "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+    "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+    "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+    "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400",
+    "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400",
+  ];
+  // Deterministic color from speaker name
+  const hash = speaker.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return colors[hash % colors.length];
+}
+
+function getSpeakerInitials(speaker: string | null): string {
+  if (!speaker) return "?";
+  return speaker
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+interface TranscriptLineProps {
+  line: TranscriptLineType;
+  searchHighlight?: { start: number; end: number }[];
+}
+
+export function TranscriptLine({ line, searchHighlight }: TranscriptLineProps) {
+  const { activeLineId, seek } = usePlayerStore();
+  const isActive = activeLineId === line.id;
+
+  const handleClick = () => {
+    if (line.start_offset !== null) {
+      seek(line.start_offset);
+    }
+  };
+
+  const renderText = () => {
+    if (!searchHighlight || searchHighlight.length === 0) {
+      return line.text;
+    }
+
+    // Sort highlights by start position
+    const sorted = [...searchHighlight].sort((a, b) => a.start - b.start);
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+
+    for (const h of sorted) {
+      if (h.start > lastIndex) {
+        parts.push(
+          <span key={`pre-${lastIndex}`}>{line.text.slice(lastIndex, h.start)}</span>
+        );
+      }
+      parts.push(
+        <mark
+          key={`mark-${h.start}`}
+          className="bg-fireflies-yellow/30 text-foreground rounded px-0.5"
+        >
+          {line.text.slice(h.start, h.end)}
+        </mark>
+      );
+      lastIndex = h.end;
+    }
+
+    if (lastIndex < line.text.length) {
+      parts.push(<span key="post">{line.text.slice(lastIndex)}</span>);
+    }
+
+    return parts;
+  };
+
+  return (
+    <div
+      onClick={handleClick}
+      className={`flex gap-3 px-4 py-2.5 cursor-pointer transition-colors duration-150 border-l-2 ${
+        isActive
+          ? "bg-fireflies-yellow/5 border-fireflies-yellow"
+          : "border-transparent hover:bg-muted/50"
+      }`}
+    >
+      {/* Speaker avatar */}
+      <div
+        className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${getSpeakerColor(
+          line.speaker
+        )}`}
+      >
+        {getSpeakerInitials(line.speaker)}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        {/* Speaker name + timestamp */}
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className="text-xs font-semibold text-foreground">
+            {line.speaker || "Unknown"}
+          </span>
+          {line.start_offset !== null && (
+            <span className="text-[10px] font-mono text-muted-foreground">
+              {formatTimestamp(line.start_offset)}
+            </span>
+          )}
+        </div>
+
+        {/* Text */}
+        <p className="text-sm text-foreground/90 leading-relaxed">
+          {renderText()}
+        </p>
+      </div>
+    </div>
+  );
+}
