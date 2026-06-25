@@ -6,7 +6,7 @@ import {
   useUpdateActionItem,
   useCreateActionItem,
 } from "@/api/queries/useActionItems";
-import { Check, Plus, Trash2, Loader2 } from "lucide-react";
+import { Check, Plus, Loader2 } from "lucide-react";
 
 interface ActionItemsListProps {
   meetingId: string;

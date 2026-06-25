@@ -3,7 +3,6 @@ import {
   createOrGetThread,
   postMessage,
   fetchMessages,
-  type ChatMessage,
 } from "@/api/chatApi";
 
 export function useChat(meetingId: string) {

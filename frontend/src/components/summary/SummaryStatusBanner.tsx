@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 
 interface SummaryStatusBannerProps {
   status: string;

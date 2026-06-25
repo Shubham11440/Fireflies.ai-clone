@@ -50,7 +50,7 @@ export function FilterDrawer() {
               }`}
           >
             {topic.name}
-            {topic.meeting_count > 0 && (
+            {(topic.meeting_count ?? 0) > 0 && (
               <span className="ml-1 opacity-60">{topic.meeting_count}</span>
             )}
           </button>

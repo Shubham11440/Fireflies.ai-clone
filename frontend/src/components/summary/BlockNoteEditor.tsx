@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
 import "@blocknote/shadcn/style.css";
@@ -17,8 +17,6 @@ export function BlockNoteEditor({
   onSave,
   isSaving,
 }: BlockNoteEditorProps) {
-  const [isReady, setIsReady] = useState(false);
-
   const editor = useCreateBlockNote({
     initialContent: initialContent
       ? [{ type: "paragraph", content: initialContent }]

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { MessageSquare, Highlighter, Trash2, X, Send } from "lucide-react";
 import {
-  useHighlights,
   useCreateHighlight,
   useDeleteHighlight,
   useComments,
