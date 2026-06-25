@@ -3,6 +3,7 @@ import {
   createOrGetThread,
   postMessage,
   fetchMessages,
+  type ChatMessage,
 } from "@/api/chatApi";
 
 export function useChat(meetingId: string) {
@@ -27,7 +28,31 @@ export function useChat(meetingId: string) {
   // Post message mutation — optimistic update
   const postMutation = useMutation({
     mutationFn: (question: string) => postMessage(threadId!, question),
-    onSuccess: () => {
+    onMutate: async (question: string) => {
+      await qc.cancelQueries({ queryKey: ["chatMessages", threadId] });
+      const previousMessages = qc.getQueryData<{ messages: ChatMessage[] }>(["chatMessages", threadId]);
+      if (previousMessages) {
+        qc.setQueryData(["chatMessages", threadId], {
+          messages: [
+            ...previousMessages.messages,
+            {
+              id: `temp-${Date.now()}`,
+              thread_id: threadId!,
+              role: "user" as const,
+              content: question,
+              created_at: new Date().toISOString(),
+            },
+          ],
+        });
+      }
+      return { previousMessages };
+    },
+    onError: (err, question, context) => {
+      if (context?.previousMessages) {
+        qc.setQueryData(["chatMessages", threadId], context.previousMessages);
+      }
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ["chatMessages", threadId] });
     },
   });

@@ -14,7 +14,7 @@ load_dotenv(_env_path)
 class Settings:
     """Read-only settings populated from environment variables."""
 
-    LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "mock")
+    LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "gemini")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
     LLM_TIMEOUT_SEC: int = int(os.getenv("LLM_TIMEOUT_SEC", "60"))
@@ -28,7 +28,9 @@ class Settings:
     ]
 
     def is_mock(self) -> bool:
-        return self.LLM_PROVIDER.lower() != "gemini" or not self.GEMINI_API_KEY
+        key = self.GEMINI_API_KEY or ""
+        is_placeholder = key.startswith("AIzaSyBaJEKt") or not key
+        return self.LLM_PROVIDER.lower() != "gemini" or is_placeholder
 
     def summary_provider_name(self) -> str:
         return "mock" if self.is_mock() else "gemini"
