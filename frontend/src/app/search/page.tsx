@@ -7,6 +7,7 @@ import { Search, Loader2, FileText, MessageSquare, CheckSquare, ArrowLeft } from
 import { useGlobalSearch } from "@/api/queries/useGlobalSearch";
 import type { SearchHit, SearchType } from "@/api/searchApi";
 
+
 const TYPE_LABELS: Record<SearchType, string> = {
   all: "All",
   transcript: "Transcript",
