@@ -6,6 +6,10 @@
   :root {
     --background: #F8FAFC;
     --foreground: #0E1117;
+    --card: #FFFFFF;
+    --card-foreground: #0E1117;
+    --popover: #FFFFFF;
+    --popover-foreground: #0E1117;
     --muted: #F1F5F9;
     --muted-foreground: #64748B;
     --border: #E2E8F0;
@@ -21,6 +25,10 @@
   .dark {
     --background: #0E1117;
     --foreground: #F8FAFC;
+    --card: #1A1D27;
+    --card-foreground: #F8FAFC;
+    --popover: #1A1D27;
+    --popover-foreground: #F8FAFC;
     --muted: #1A1D27;
     --muted-foreground: #94A3B8;
     --border: #252830;
