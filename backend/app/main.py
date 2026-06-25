@@ -8,7 +8,8 @@ from fastapi.responses import JSONResponse
 
 from backend.app.config import settings
 from backend.app.db import init_db, close_db
-from backend.app.errors import AppError, app_error_handler, generic_error_handler
+from backend.app.errors import AppError, app_error_handler, generic_error_handler, integrity_error_handler
+import sqlite3
 from backend.app.logging.middleware import LoggingMiddleware
 from backend.app.routers import meetings, transcript, summary, action_items, chapters, notes, topics, export, highlights, comments, search, chat, llm
 
@@ -42,6 +43,7 @@ app.add_middleware(LoggingMiddleware)
 
 # ── Error handlers ───────────────────────────────────────────
 app.add_exception_handler(AppError, app_error_handler)
+app.add_exception_handler(sqlite3.IntegrityError, integrity_error_handler)
 app.add_exception_handler(Exception, generic_error_handler)
 
 # ── Routers ──────────────────────────────────────────────────

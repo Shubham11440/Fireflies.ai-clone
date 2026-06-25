@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
+import sqlite3
 
 
 class AppError(Exception):
@@ -45,4 +46,11 @@ async def generic_error_handler(request: Request, exc: Exception) -> JSONRespons
     return JSONResponse(
         status_code=500,
         content={"detail": str(exc), "code": "INTERNAL_ERROR"},
+    )
+
+
+async def integrity_error_handler(request: Request, exc: sqlite3.IntegrityError) -> JSONResponse:
+    return JSONResponse(
+        status_code=400,
+        content={"detail": f"Database integrity error: {str(exc)}", "code": "INTEGRITY_ERROR"},
     )

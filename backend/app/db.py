@@ -26,9 +26,19 @@ async def close_db() -> None:
 
 
 async def init_db() -> None:
-    """Run all pending migrations."""
+    """Run all pending migrations and ensure default user exists."""
     db = await get_db()
     await run_migrations(db)
+    # Ensure default user exists to satisfy foreign key constraints
+    cursor = await db.execute("SELECT id FROM users WHERE id = ?", ("user-default",))
+    if not await cursor.fetchone():
+        from datetime import datetime, timezone
+        now = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        await db.execute(
+            "INSERT INTO users (id, name, email, avatar_url, created_at) VALUES (?, ?, ?, ?, ?)",
+            ("user-default", "Default User", "user@fireflies.local", None, now),
+        )
+        await db.commit()
 
 
 async def run_migrations(db: aiosqlite.Connection) -> None:
