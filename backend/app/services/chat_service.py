@@ -1,19 +1,17 @@
 """Chat service — orchestrates Q&A chat for a meeting using the ChatProvider adapter."""
 from __future__ import annotations
 
+import asyncio
 import json
 
 import aiosqlite
 
-from backend.app.adapters.chat.mock import MockChatAdapter
+from backend.app.adapters.factory import get_chat_provider
 from backend.app.logging.logger import CustomLogger
 from backend.app.repositories import chat as chat_repo
 from backend.app.repositories import transcript as transcript_repo
 from backend.app.repositories import summary as summary_repo
 from backend.app.errors import NotFoundError
-
-# Singleton adapter (mock by default; swap for LLMChatAdapter via config)
-_chat_provider = MockChatAdapter()
 
 
 async def get_or_create_thread(
@@ -77,7 +75,9 @@ async def post_message(
 
     # Call adapter
     logger.info({"event": "CHAT_QUESTION", "event_type": "internal_process"})
-    answer = _chat_provider.ask(
+    chat_provider = get_chat_provider()
+    answer = await asyncio.to_thread(
+        chat_provider.ask,
         question=question,
         transcript_text=transcript_text,
         summary_text=summary_text,

@@ -1,0 +1,141 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "pyproject.toml"
+      - ".github/workflows/backend-ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "pyproject.toml"
+      - ".github/workflows/backend-ci.yml"
+
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  lint:
+    name: 🔍 Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install ruff
+        run: pip install ruff==0.8.0
+
+      - name: Ruff check
+        run: ruff check backend/
+
+      - name: Ruff format check
+        run: ruff format --check backend/
+
+  typecheck:
+    name: 🏷️ Type Check (mypy)
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+          pip install -r backend/requirements-dev.txt
+
+      - name: Run mypy
+        run: mypy backend/app/ --config-file pyproject.toml
+
+  test:
+    name: 🧪 Tests (pytest)
+    runs-on: ubuntu-latest
+    needs: typecheck
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('backend/requirements*.txt') }}
+          restore-keys: pip-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+          pip install -r backend/requirements-dev.txt
+
+      - name: Run tests
+        run: pytest backend/tests/ -v --tb=short
+        env:
+          DATABASE_URL: ":memory:"
+          PYTHONPATH: .
+
+  migrate:
+    name: 📦 Migration Validation
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Validate migrations apply cleanly
+        run: |
+          python -c "
+          import sqlite3
+          import os
+          conn = sqlite3.connect(':memory:')
+          for f in sorted(os.listdir('backend/migrations')):
+              if f.endswith('.sql'):
+                  with open(f'backend/migrations/{f}') as sql:
+                      conn.executescript(sql.read())
+                      print(f'✅ {f} applied successfully')
+          conn.close()
+          print('All migrations validated.')
+          "
+
+  smoke:
+    name: 🏥 Health Smoke Test
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Start server & health check
+        run: |
+          PYTHONPATH=. uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 &
+          sleep 5
+          curl -f http://localhost:8000/api/health || exit 1
+          echo "✅ Health check passed"
+          kill %1

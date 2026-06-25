@@ -1,9 +1,10 @@
 "use client";
 
-import { useChapters } from "@/api/queries/useChapters";
+import { useChapters, useGenerateChapters } from "@/api/queries/useChapters";
+import { useSummary } from "@/api/queries/useSummary";
 import { usePlayerStore } from "@/stores/playerStore";
 import { useCallback } from "react";
-import { Loader2, BookOpen } from "lucide-react";
+import { Loader2, BookOpen, Sparkles } from "lucide-react";
 
 interface ChaptersOutlineProps {
   meetingId: string;
@@ -11,6 +12,8 @@ interface ChaptersOutlineProps {
 
 export function ChaptersOutline({ meetingId }: ChaptersOutlineProps) {
   const { data: chapters, isLoading } = useChapters(meetingId);
+  const { data: summary } = useSummary(meetingId);
+  const { mutate: generateChapters, isPending } = useGenerateChapters(meetingId);
   const { seek } = usePlayerStore();
 
   const handleChapterClick = useCallback(
@@ -21,6 +24,8 @@ export function ChaptersOutline({ meetingId }: ChaptersOutlineProps) {
     },
     [seek]
   );
+
+  const isGeneratingChapters = isPending || (summary?.status === "processing" || summary?.status === "pending");
 
   if (isLoading) {
     return (
@@ -35,6 +40,20 @@ export function ChaptersOutline({ meetingId }: ChaptersOutlineProps) {
       <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
         <BookOpen className="h-8 w-8 text-muted-foreground/50 mb-3" />
         <p className="text-sm text-muted-foreground">No chapters yet.</p>
+        {isGeneratingChapters ? (
+          <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            Generating chapters with summary…
+          </p>
+        ) : (
+          <button
+            onClick={() => generateChapters()}
+            className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            <Sparkles className="h-3 w-3" />
+            Generate chapters
+          </button>
+        )}
       </div>
     );
   }

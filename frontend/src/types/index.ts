@@ -138,3 +138,12 @@ export interface UpdateMeetingRequest {
   media_url?: string | null;
   participant_names?: string[];
 }
+
+// ── Media Player ──────────────────────────────────────────────
+export type MediaSourceKind = "file" | "youtube" | "audio";
+
+export interface MediaSource {
+  kind: MediaSourceKind;
+  url: string;
+  label?: string;
+}

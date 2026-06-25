@@ -7,3 +7,10 @@ export async function fetchChapters(meetingId: string): Promise<Chapter[]> {
   );
   return data;
 }
+
+export async function generateChapters(meetingId: string): Promise<Chapter[]> {
+  const { data } = await apiClient.post<Chapter[]>(
+    `/api/meetings/${meetingId}/chapters/generate`
+  );
+  return data;
+}

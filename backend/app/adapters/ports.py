@@ -27,3 +27,10 @@ class ChatProvider(Protocol):
         logger: CustomLogger,
     ) -> str: ...
 
+
+@runtime_checkable
+class ChapterProvider(Protocol):
+    def generate_chapters(
+        self, transcript_lines: list[dict], *, logger: CustomLogger
+    ) -> list[dict]: ...
+

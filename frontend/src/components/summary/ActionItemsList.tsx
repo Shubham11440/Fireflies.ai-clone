@@ -58,27 +58,24 @@ export function ActionItemsList({ meetingId }: ActionItemsListProps) {
           items.map((item) => (
             <div
               key={item.id}
-              className={`flex items-start gap-3 py-2 px-2 rounded-md group transition-colors ${
-                item.is_completed ? "opacity-60" : "hover:bg-muted/50"
-              }`}
+              className={`flex items-start gap-3 py-2 px-2 rounded-md group transition-colors ${item.is_completed ? "opacity-60" : "hover:bg-muted/50"
+                }`}
             >
               <button
                 onClick={() => toggleComplete(item.id, item.is_completed)}
-                className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
-                  item.is_completed
+                className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${item.is_completed
                     ? "bg-fireflies-yellow border-fireflies-yellow text-fireflies-navy"
                     : "border-border hover:border-fireflies-yellow"
-                }`}
+                  }`}
               >
                 {item.is_completed && <Check className="h-3 w-3" />}
               </button>
               <div className="flex-1 min-w-0">
                 <p
-                  className={`text-sm ${
-                    item.is_completed
+                  className={`text-sm ${item.is_completed
                       ? "line-through text-muted-foreground"
                       : "text-foreground"
-                  }`}
+                    }`}
                 >
                   {item.text}
                 </p>

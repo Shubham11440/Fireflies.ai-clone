@@ -1,6 +1,7 @@
 """GenerateSummaryService — async state machine for summary generation."""
 from __future__ import annotations
 
+import asyncio
 import json
 import time
 from datetime import datetime, timezone
@@ -9,11 +10,12 @@ from backend.app.db import get_db
 from backend.app.repositories import summary as summary_repo
 from backend.app.repositories import transcript as transcript_repo
 from backend.app.repositories import action_items as ai_repo
-from backend.app.repositories import chapters as chapters_repo
-from backend.app.models.entities import SummaryProcess, ActionItem, Chapter
-from backend.app.adapters.summary.mock import MockSummaryProvider
+from backend.app.models.entities import SummaryProcess, ActionItem
+from backend.app.adapters.factory import get_summary_provider
+from backend.app.config import settings
 from backend.app.logging.logger import CustomLogger
 from backend.app.logging.events import Events
+from backend.app.services.generate_chapters import run_chapters
 
 
 def _now() -> str:
@@ -43,9 +45,11 @@ async def run_summary(meeting_id: str, logger: CustomLogger) -> None:
         if not transcript_text.strip():
             raise ValueError("No transcript content to summarize")
 
-        # Generate summary (mock provider for now)
-        provider = MockSummaryProvider()
-        result = provider.summarize(transcript_text, logger=logger)
+        # Generate summary via configured provider
+        provider = get_summary_provider()
+        result = await asyncio.to_thread(
+            provider.summarize, transcript_text, logger=logger
+        )
 
         # Extract action items from summary
         action_blocks = result.get("action_items", {}).get("blocks", [])
@@ -60,21 +64,8 @@ async def run_summary(meeting_id: str, logger: CustomLogger) -> None:
                 )
                 await ai_repo.create(db, item)
 
-        # Extract chapters from key_decisions section
-        decision_blocks = result.get("key_decisions", {}).get("blocks", [])
-        chaps = []
-        for i, block in enumerate(decision_blocks):
-            if block.get("content"):
-                chaps.append(
-                    Chapter(
-                        id=__import__("uuid").uuid4().hex,
-                        meeting_id=meeting_id,
-                        title=block["content"],
-                        seq=i + 1,
-                    )
-                )
-        if chaps:
-            await chapters_repo.create_many(db, chaps)
+        # Generate chapters synchronously after summary
+        await run_chapters(meeting_id, logger)
 
         elapsed = time.monotonic() - start_monotonic
         end_time = _now()
@@ -85,7 +76,7 @@ async def run_summary(meeting_id: str, logger: CustomLogger) -> None:
             meeting_id,
             "completed",
             result=json.dumps(result),
-            provider="mock",
+            provider=settings.summary_provider_name(),
             chunk_count=1,
             processing_time=round(elapsed, 3),
             end_time=end_time,

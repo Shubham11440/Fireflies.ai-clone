@@ -31,11 +31,10 @@ export function FilterDrawer() {
       <div className="flex flex-wrap gap-2">
         <button
           onClick={() => setSelectedTopic(null)}
-          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-            selectedTopic === null
+          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${selectedTopic === null
               ? "bg-fireflies-yellow text-fireflies-navy border-fireflies-yellow"
               : "bg-transparent text-muted-foreground border-border hover:border-foreground/30"
-          }`}
+            }`}
         >
           All
         </button>
@@ -45,11 +44,10 @@ export function FilterDrawer() {
             onClick={() =>
               setSelectedTopic(selectedTopic === topic.name ? null : topic.name)
             }
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-              selectedTopic === topic.name
+            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${selectedTopic === topic.name
                 ? "bg-fireflies-yellow text-fireflies-navy border-fireflies-yellow"
                 : "bg-transparent text-muted-foreground border-border hover:border-foreground/30"
-            }`}
+              }`}
           >
             {topic.name}
             {topic.meeting_count > 0 && (

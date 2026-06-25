@@ -16,6 +16,10 @@ async def create_many(db: aiosqlite.Connection, chapters: list[Chapter]) -> None
     )
 
 
+async def delete_by_meeting(db: aiosqlite.Connection, meeting_id: str) -> None:
+    await db.execute("DELETE FROM chapters WHERE meeting_id = ?", (meeting_id,))
+
+
 async def list_by_meeting(db: aiosqlite.Connection, meeting_id: str) -> list[dict]:
     cursor = await db.execute(
         "SELECT * FROM chapters WHERE meeting_id = ? ORDER BY seq",

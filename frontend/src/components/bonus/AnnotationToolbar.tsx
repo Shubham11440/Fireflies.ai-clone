@@ -17,17 +17,17 @@ import type { Comment } from "@/api/commentsApi";
 
 const HIGHLIGHT_COLORS: { value: string; label: string; bg: string; border: string }[] = [
   { value: "yellow", label: "Yellow", bg: "bg-yellow-300", border: "border-yellow-400" },
-  { value: "green",  label: "Green",  bg: "bg-green-300",  border: "border-green-400" },
-  { value: "blue",   label: "Blue",   bg: "bg-blue-300",   border: "border-blue-400" },
-  { value: "pink",   label: "Pink",   bg: "bg-pink-300",   border: "border-pink-400" },
+  { value: "green", label: "Green", bg: "bg-green-300", border: "border-green-400" },
+  { value: "blue", label: "Blue", bg: "bg-blue-300", border: "border-blue-400" },
+  { value: "pink", label: "Pink", bg: "bg-pink-300", border: "border-pink-400" },
   { value: "purple", label: "Purple", bg: "bg-purple-300", border: "border-purple-400" },
 ];
 
 const COLOR_LEFT_BORDER: Record<string, string> = {
   yellow: "border-l-yellow-400",
-  green:  "border-l-green-400",
-  blue:   "border-l-blue-400",
-  pink:   "border-l-pink-400",
+  green: "border-l-green-400",
+  blue: "border-l-blue-400",
+  pink: "border-l-pink-400",
   purple: "border-l-purple-400",
 };
 
@@ -149,11 +149,10 @@ export function AnnotationToolbar({
           }
         }}
         title={existingHighlight ? "Remove highlight" : "Highlight line"}
-        className={`p-1 rounded transition-colors ${
-          existingHighlight
+        className={`p-1 rounded transition-colors ${existingHighlight
             ? "text-fireflies-yellow"
             : "text-muted-foreground hover:text-fireflies-yellow"
-        }`}
+          }`}
       >
         <Highlighter className="h-3.5 w-3.5" />
       </button>
@@ -182,11 +181,10 @@ export function AnnotationToolbar({
           setShowColors(false);
         }}
         title="Comments"
-        className={`relative p-1 rounded transition-colors ${
-          commentCount > 0
+        className={`relative p-1 rounded transition-colors ${commentCount > 0
             ? "text-blue-500"
             : "text-muted-foreground hover:text-blue-500"
-        }`}
+          }`}
       >
         <MessageSquare className="h-3.5 w-3.5" />
         {commentCount > 0 && (
