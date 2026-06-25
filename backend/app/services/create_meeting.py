@@ -6,18 +6,17 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from backend.app.db import get_db
+from backend.app.models.entities import Meeting, Participant, TranscriptLine
+from backend.app.repositories import meeting_notes as notes_repo
 from backend.app.repositories import meetings as meetings_repo
 from backend.app.repositories import participants as participants_repo
 from backend.app.repositories import transcript as transcript_repo
-from backend.app.repositories import summary as summary_repo
-from backend.app.repositories import meeting_notes as notes_repo
-from backend.app.models.entities import Meeting, Participant, TranscriptLine, SummaryProcess
 from backend.app.services.transcript_import import (
     ParsedLine,
+    assign_sequential_offsets,
+    parse_json,
     parse_txt,
     parse_vtt,
-    parse_json,
-    assign_sequential_offsets,
 )
 
 
@@ -120,10 +119,6 @@ async def create_meeting(
                         (tl.id, tl.meeting_id, tl.text),
                     )
                 line_count = len(lines)
-
-        # Create empty summary process
-        sp = SummaryProcess(meeting_id=meeting_id, created_at=now, updated_at=now)
-        await summary_repo.upsert(db, sp)
 
         # Create empty meeting notes
         await notes_repo.upsert(db, meeting_id)
