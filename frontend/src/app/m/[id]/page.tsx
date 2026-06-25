@@ -2,14 +2,18 @@
 
 import { use } from "react";
 import { useMeeting } from "@/api/queries/useMeeting";
+import { useUpdateMeeting, useDeleteMeeting } from "@/api/queries/useMeetings";
 import { AudioPlayer } from "@/components/transcript/AudioPlayer";
 import { TranscriptPanel } from "@/components/transcript/TranscriptPanel";
 import { TranscriptSearchBox } from "@/components/transcript/TranscriptSearchBox";
 import { SummaryPanel } from "@/components/summary/SummaryPanel";
+import { EditMeetingModal } from "@/components/meetings/EditMeetingModal";
+import { DeleteConfirmDialog } from "@/components/meetings/DeleteConfirmDialog";
 import { useTranscriptSearchStore } from "@/stores/transcriptSearchStore";
-import { ArrowLeft, Clock, Users, Loader2, PanelRightOpen, PanelRightClose } from "lucide-react";
+import { ArrowLeft, Clock, Users, Loader2, PanelRightOpen, PanelRightClose, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 function formatDuration(sec: number): string {
   const h = Math.floor(sec / 3600);
@@ -55,6 +59,11 @@ export default function MeetingDetailPage({
   const { matchIds, currentMatchIndex, setQuery, navigateMatch } =
     useTranscriptSearchStore();
   const [showSummary, setShowSummary] = useState(true);
+  const [showEdit, setShowEdit] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+  const router = useRouter();
+  const updateMutation = useUpdateMeeting();
+  const deleteMutation = useDeleteMeeting();
 
   if (isLoading) {
     return (
@@ -77,6 +86,26 @@ export default function MeetingDetailPage({
       </div>
     );
   }
+
+  const handleEditSave = (data: {
+    title?: string;
+    occurred_at?: string;
+    duration_sec?: number;
+    participant_names?: string[];
+  }) => {
+    updateMutation.mutate(
+      { id, ...data },
+      {
+        onSuccess: () => setShowEdit(false),
+      }
+    );
+  };
+
+  const handleDeleteConfirm = () => {
+    deleteMutation.mutate(id, {
+      onSuccess: () => router.push("/"),
+    });
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -107,17 +136,33 @@ export default function MeetingDetailPage({
               )}
             </div>
           </div>
-          <button
-            onClick={() => setShowSummary(!showSummary)}
-            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            title={showSummary ? "Hide summary panel" : "Show summary panel"}
-          >
-            {showSummary ? (
-              <PanelRightClose className="h-4 w-4" />
-            ) : (
-              <PanelRightOpen className="h-4 w-4" />
-            )}
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setShowEdit(true)}
+              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              title="Edit meeting"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setShowDelete(true)}
+              className="p-1.5 rounded-md text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              title="Delete meeting"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setShowSummary(!showSummary)}
+              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              title={showSummary ? "Hide summary panel" : "Show summary panel"}
+            >
+              {showSummary ? (
+                <PanelRightClose className="h-4 w-4" />
+              ) : (
+                <PanelRightOpen className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Participants */}
@@ -168,6 +213,26 @@ export default function MeetingDetailPage({
           </div>
         )}
       </div>
+
+      {/* Edit modal */}
+      {showEdit && (
+        <EditMeetingModal
+          meeting={meeting}
+          isLoading={updateMutation.isPending}
+          onSave={handleEditSave}
+          onClose={() => setShowEdit(false)}
+        />
+      )}
+
+      {/* Delete confirmation */}
+      {showDelete && (
+        <DeleteConfirmDialog
+          meetingTitle={meeting.title}
+          isLoading={deleteMutation.isPending}
+          onConfirm={handleDeleteConfirm}
+          onClose={() => setShowDelete(false)}
+        />
+      )}
     </div>
   );
 }
