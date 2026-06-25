@@ -6,12 +6,22 @@ import { MeetingCard } from "@/components/library/MeetingCard";
 import { SearchBar } from "@/components/library/SearchBar";
 import { SortControl } from "@/components/library/SortControl";
 import { EmptyState } from "@/components/library/EmptyState";
-import { Grid, List, Loader2 } from "lucide-react";
+import { FilterDrawer } from "@/components/library/FilterDrawer";
+import { Grid, List, Loader2, Filter } from "lucide-react";
 
 export default function LibraryPage() {
-  const { searchQuery, sort, viewMode, setViewMode } = useLibraryStore();
+  const {
+    searchQuery,
+    sort,
+    viewMode,
+    setViewMode,
+    selectedTopic,
+    filterOpen,
+    setFilterOpen,
+  } = useLibraryStore();
   const { data, isLoading, error } = useMeetings({
     q: searchQuery || undefined,
+    topic: selectedTopic || undefined,
     sort,
     limit: 50,
   });
@@ -31,9 +41,20 @@ export default function LibraryPage() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-4">
         <SearchBar />
         <SortControl />
+        <button
+          onClick={() => setFilterOpen(!filterOpen)}
+          className={`flex items-center gap-1.5 px-3 h-9 rounded-md border text-sm transition-colors ${
+            selectedTopic
+              ? "border-fireflies-yellow bg-fireflies-yellow/10 text-fireflies-yellow"
+              : "border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+          }`}
+        >
+          <Filter className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Filter</span>
+        </button>
         <div className="flex items-center border border-border rounded-md">
           <button
             onClick={() => setViewMode("grid")}
@@ -57,6 +78,9 @@ export default function LibraryPage() {
           </button>
         </div>
       </div>
+
+      {/* Filter drawer */}
+      <FilterDrawer />
 
       {/* Content */}
       {isLoading ? (
