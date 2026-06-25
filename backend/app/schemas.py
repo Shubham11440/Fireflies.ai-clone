@@ -140,3 +140,29 @@ class TopicResponse(BaseModel):
 
 class TopicCreateRequest(BaseModel):
     name: str
+
+
+# ── Create / Update Meeting ───────────────────────────────────
+class CreateMeetingRequest(BaseModel):
+    title: str
+    occurred_at: str
+    duration_sec: float = 0.0
+    source: str = "manual"
+    media_url: Optional[str] = None
+    participant_names: list[str] = []
+    transcript_content: Optional[str] = None
+    transcript_format: str = "txt"  # txt | vtt | json
+
+
+class UpdateMeetingRequest(BaseModel):
+    title: Optional[str] = None
+    occurred_at: Optional[str] = None
+    duration_sec: Optional[float] = None
+    media_url: Optional[str] = None
+    participant_names: Optional[list[str]] = None
+
+
+class CreateMeetingResponse(BaseModel):
+    id: str
+    title: str
+    transcript_lines: int = 0
