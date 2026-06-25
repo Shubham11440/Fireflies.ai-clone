@@ -2,7 +2,8 @@
 
 import type { SummaryProcessResponse, SummarySection, SummaryBlock } from "@/types";
 import { useGenerateSummary } from "@/api/queries/useSummary";
-import { FileText, Users, CheckCircle, ArrowRight, Lightbulb } from "lucide-react";
+import { FileText, Users, CheckCircle, ArrowRight, Lightbulb, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 function BlockRenderer({ block }: { block: SummaryBlock }) {
   switch (block.type) {
@@ -53,8 +54,50 @@ interface SummaryViewProps {
   summary: SummaryProcessResponse | undefined;
 }
 
+const STATUS_MESSAGES = [
+  "Analyzing transcript…",
+  "Extracting action items…",
+  "Writing summary…",
+  "Identifying key decisions…",
+  "Organizing topics…",
+];
+
+function SummaryGeneratingState({ status }: { status: string }) {
+  const [msgIndex, setMsgIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMsgIndex((i) => (i + 1) % STATUS_MESSAGES.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+      <div className="relative mb-4">
+        <Loader2 className="h-8 w-8 animate-spin text-fireflies-yellow" />
+        <div className="absolute inset-0 rounded-full bg-fireflies-yellow/10 animate-ping" />
+      </div>
+      <p className="text-sm font-medium text-foreground mb-1">
+        {status === "pending" ? "Queued…" : "Generating summary…"}
+      </p>
+      <p className="text-xs text-muted-foreground transition-opacity duration-500">
+        {STATUS_MESSAGES[msgIndex]}
+      </p>
+      {/* Progress shimmer */}
+      <div className="w-48 h-1 bg-muted rounded-full mt-4 overflow-hidden">
+        <div className="h-full bg-fireflies-yellow/60 rounded-full animate-[shimmer_2s_ease-in-out_infinite] w-1/3" />
+      </div>
+    </div>
+  );
+}
+
 export function SummaryView({ meetingId, summary }: SummaryViewProps) {
   const generateMutation = useGenerateSummary(meetingId);
+
+  if (summary && (summary.status === "pending" || summary.status === "processing")) {
+    return <SummaryGeneratingState status={summary.status} />;
+  }
 
   if (!summary || summary.status === "none") {
     return (
