@@ -16,9 +16,19 @@ interface SessionState {
   user: User | null;
   theme: "light" | "dark";
   toasts: Toast[];
+  hydrateTheme: () => void;
   toggleTheme: () => void;
   addToast: (toast: Omit<Toast, "id">) => string;
   removeToast: (id: string) => void;
+}
+
+function getInitialTheme(): "light" | "dark" {
+  if (typeof window === "undefined") return "light";
+  const stored = localStorage.getItem("theme");
+  if (stored === "dark" || stored === "light") return stored;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 }
 
 export const useSessionStore = create<SessionState>((set) => ({
@@ -29,6 +39,11 @@ export const useSessionStore = create<SessionState>((set) => ({
   },
   theme: "light",
   toasts: [],
+  hydrateTheme: () => {
+    const theme = getInitialTheme();
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    set({ theme });
+  },
   toggleTheme: () =>
     set((state) => {
       const newTheme = state.theme === "light" ? "dark" : "light";

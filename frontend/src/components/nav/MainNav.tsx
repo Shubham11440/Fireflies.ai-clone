@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Sun, Moon, Bell } from "lucide-react";
-import { useSessionStore } from "@/stores/sessionStore";
+import { Search, Bell } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function MainNav() {
   const pathname = usePathname();
-  const { theme, toggleTheme } = useSessionStore();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -45,19 +44,13 @@ export function MainNav() {
 
         {/* Right side */}
         <div className="flex items-center gap-2">
-          <button className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-            <Search className="h-4 w-4" />
-          </button>
-          <button
-            onClick={toggleTheme}
+          <Link
+            href="/search"
             className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
-            {theme === "dark" ? (
-              <Sun className="h-4 w-4" />
-            ) : (
-              <Moon className="h-4 w-4" />
-            )}
-          </button>
+            <Search className="h-4 w-4" />
+          </Link>
+          <ThemeToggle />
           <button className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors relative">
             <Bell className="h-4 w-4" />
           </button>
