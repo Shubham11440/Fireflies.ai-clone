@@ -1,22 +1,20 @@
 "use client";
 
-import { useRef, useEffect, useCallback, useState } from "react";
+import { useRef, useEffect, useCallback, useState, useMemo } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useTranscript } from "@/api/queries/useTranscript";
+import { useTranscriptSearch } from "@/api/queries/useTranscriptSearch";
 import { useActiveLineTracker } from "@/api/queries/useActiveLineTracker";
 import { usePlayerStore } from "@/stores/playerStore";
+import { useTranscriptSearchStore } from "@/stores/transcriptSearchStore";
 import { TranscriptLine } from "./TranscriptLine";
 import { Loader2, ChevronDown } from "lucide-react";
 
 interface TranscriptPanelProps {
   meetingId: string;
-  searchMatchIds?: Set<string>;
 }
 
-export function TranscriptPanel({
-  meetingId,
-  searchMatchIds,
-}: TranscriptPanelProps) {
+export function TranscriptPanel({ meetingId }: TranscriptPanelProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const lastAutoScrollRef = useRef<number>(0);
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
@@ -29,7 +27,41 @@ export function TranscriptPanel({
     isFetchingNextPage,
   } = useTranscript(meetingId);
 
-  const { activeLineId, isPlaying } = usePlayerStore();
+  const { activeLineId, isPlaying, seek } = usePlayerStore();
+  const { query, matchIds, currentMatchIndex, setMatchIds } =
+    useTranscriptSearchStore();
+
+  // Search transcript
+  const { data: searchData } = useTranscriptSearch(meetingId, query);
+
+  // Build match map: lineId -> [{start, end}]
+  const matchMap = useMemo(() => {
+    if (!searchData || !query) return new Map();
+    const map = new Map<string, { start: number; end: number }[]>();
+    const ids: string[] = [];
+
+    for (const item of searchData.items) {
+      const text = item.text.toLowerCase();
+      const q = query.toLowerCase();
+      let searchStart = 0;
+      const highlights: { start: number; end: number }[] = [];
+
+      while (searchStart < text.length) {
+        const idx = text.indexOf(q, searchStart);
+        if (idx === -1) break;
+        highlights.push({ start: idx, end: idx + q.length });
+        searchStart = idx + 1;
+      }
+
+      if (highlights.length > 0) {
+        map.set(item.line_id, highlights);
+        ids.push(item.line_id);
+      }
+    }
+
+    setMatchIds(ids);
+    return map;
+  }, [searchData, query, setMatchIds]);
 
   // Flatten all pages into a single array
   const allLines = data?.pages.flatMap((page) => page.lines) ?? [];
@@ -44,6 +76,16 @@ export function TranscriptPanel({
     overscan: 10,
   });
 
+  // Scroll to current match when navigating
+  useEffect(() => {
+    if (matchIds.length === 0) return;
+    const targetId = matchIds[currentMatchIndex];
+    const idx = allLines.findIndex((l) => l.id === targetId);
+    if (idx !== -1) {
+      virtualizer.scrollToIndex(idx, { align: "center", behavior: "smooth" });
+    }
+  }, [currentMatchIndex, matchIds, allLines, virtualizer]);
+
   // Auto-scroll to active line (only when playing)
   useEffect(() => {
     if (!isPlaying || !activeLineId || !isAutoScrolling) return;
@@ -51,7 +93,6 @@ export function TranscriptPanel({
     const idx = allLines.findIndex((l) => l.id === activeLineId);
     if (idx === -1) return;
 
-    // Throttle auto-scroll to every 300ms
     const now = Date.now();
     if (now - lastAutoScrollRef.current < 300) return;
     lastAutoScrollRef.current = now;
@@ -62,12 +103,10 @@ export function TranscriptPanel({
     });
   }, [activeLineId, isPlaying, allLines, virtualizer, isAutoScrolling]);
 
-  // Detect manual scroll to disable auto-scroll
   const handleScroll = useCallback(() => {
     setIsAutoScrolling(false);
   }, []);
 
-  // Re-enable auto-scroll when user clicks a line
   const handleLineClick = useCallback(() => {
     setIsAutoScrolling(true);
   }, []);
@@ -148,6 +187,7 @@ export function TranscriptPanel({
         >
           {virtualizer.getVirtualItems().map((virtualRow) => {
             const line = allLines[virtualRow.index];
+            const highlights = matchMap.get(line.id);
             return (
               <div
                 key={line.id}
@@ -162,7 +202,7 @@ export function TranscriptPanel({
                 }}
                 onClick={handleLineClick}
               >
-                <TranscriptLine line={line} />
+                <TranscriptLine line={line} searchHighlight={highlights} />
               </div>
             );
           })}
