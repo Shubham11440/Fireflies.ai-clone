@@ -46,9 +46,10 @@ async def search_in_meeting(
     """Full-text search within a meeting's transcript lines."""
     cursor = await db.execute(
         "SELECT tl.* FROM transcript_lines tl "
-        "JOIN transcript_fts fts ON fts.line_id = tl.id "
-        "WHERE fts.meeting_id = ? AND transcript_fts MATCH ? "
-        "ORDER BY tl.seq",
+        "WHERE tl.id IN ("
+        "  SELECT line_id FROM transcript_fts "
+        "  WHERE meeting_id = ? AND transcript_fts MATCH ?"
+        ") ORDER BY tl.seq",
         (meeting_id, q),
     )
     rows = await cursor.fetchall()

@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from backend.app.db import init_db, close_db
 from backend.app.errors import AppError, app_error_handler, generic_error_handler
 from backend.app.logging.middleware import LoggingMiddleware
-from backend.app.routers import meetings
+from backend.app.routers import meetings, transcript
 
 
 @asynccontextmanager
@@ -48,6 +48,7 @@ app.add_exception_handler(Exception, generic_error_handler)
 
 # ── Routers ──────────────────────────────────────────────────
 app.include_router(meetings.router)
+app.include_router(transcript.router)
 
 
 # ── Health check ─────────────────────────────────────────────
