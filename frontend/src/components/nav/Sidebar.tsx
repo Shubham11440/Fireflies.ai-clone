@@ -14,7 +14,7 @@ import {
 import { useState } from "react";
 
 const navItems = [
-  { href: "/", label: "Meetings", icon: Video },
+  { href: "/", label: "Meetings", icon: Video, matchExact: true },
   { href: "#", label: "Integrations", icon: Puzzle, disabled: true },
   { href: "#", label: "Team", icon: Users, disabled: true },
 ];
@@ -25,7 +25,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`hidden md:flex flex-col border-r border-bg-fireflies-navy-lighter bg-fireflies-navy text-white transition-all duration-200 ${
+      className={`hidden md:flex flex-col border-r border-fireflies-navy-lighter bg-fireflies-navy text-white transition-all duration-200 ${
         collapsed ? "w-16" : "w-56"
       }`}
     >
@@ -51,7 +51,7 @@ export function Sidebar() {
             className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
               item.disabled
                 ? "text-white/30 cursor-not-allowed"
-                : pathname === item.href
+                : (item.matchExact ? pathname === item.href : pathname.startsWith(item.href))
                 ? "bg-white/10 text-white"
                 : "text-white/70 hover:bg-white/5 hover:text-white"
             }`}
