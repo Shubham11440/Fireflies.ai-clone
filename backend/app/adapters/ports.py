@@ -14,3 +14,16 @@ class UserProvider(Protocol):
 @runtime_checkable
 class SummaryProvider(Protocol):
     def summarize(self, transcript: str, *, logger: CustomLogger) -> dict: ...
+
+
+@runtime_checkable
+class ChatProvider(Protocol):
+    def ask(
+        self,
+        question: str,
+        transcript_text: str,
+        summary_text: str,
+        *,
+        logger: CustomLogger,
+    ) -> str: ...
+
