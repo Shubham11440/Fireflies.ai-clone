@@ -27,7 +27,7 @@ export function TranscriptPanel({ meetingId }: TranscriptPanelProps) {
     isFetchingNextPage,
   } = useTranscript(meetingId);
 
-  const { activeLineId, isPlaying, seek } = usePlayerStore();
+  const { activeLineId, isPlaying } = usePlayerStore();
   const { query, matchIds, currentMatchIndex, setMatchIds } =
     useTranscriptSearchStore();
 
@@ -64,7 +64,10 @@ export function TranscriptPanel({ meetingId }: TranscriptPanelProps) {
   }, [searchData, query, setMatchIds]);
 
   // Flatten all pages into a single array
-  const allLines = data?.pages.flatMap((page) => page.lines) ?? [];
+  const allLines = useMemo(
+    () => data?.pages.flatMap((page) => page.lines) ?? [],
+    [data]
+  );
 
   // Track active line from player currentTime (bidirectional sync)
   useActiveLineTracker(allLines);

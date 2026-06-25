@@ -7,7 +7,6 @@ import {
   SkipBack,
   SkipForward,
   Volume2,
-  VolumeX,
 } from "lucide-react";
 import { usePlayerStore } from "@/stores/playerStore";
 
