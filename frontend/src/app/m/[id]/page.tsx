@@ -9,6 +9,7 @@ import { TranscriptSearchBox } from "@/components/transcript/TranscriptSearchBox
 import { SummaryPanel } from "@/components/summary/SummaryPanel";
 import { EditMeetingModal } from "@/components/meetings/EditMeetingModal";
 import { DeleteConfirmDialog } from "@/components/meetings/DeleteConfirmDialog";
+import { ExportButton } from "@/components/bonus/ExportButton";
 import { useTranscriptSearchStore } from "@/stores/transcriptSearchStore";
 import {
   ResizablePanelGroup,
@@ -142,6 +143,7 @@ export default function MeetingDetailPage({
             </div>
           </div>
           <div className="flex items-center gap-1">
+            <ExportButton meetingId={id} />
             <button
               onClick={() => setShowEdit(true)}
               className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
