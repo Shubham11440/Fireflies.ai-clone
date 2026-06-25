@@ -10,6 +10,11 @@ import { SummaryPanel } from "@/components/summary/SummaryPanel";
 import { EditMeetingModal } from "@/components/meetings/EditMeetingModal";
 import { DeleteConfirmDialog } from "@/components/meetings/DeleteConfirmDialog";
 import { useTranscriptSearchStore } from "@/stores/transcriptSearchStore";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
 import { ArrowLeft, Clock, Users, Loader2, PanelRightOpen, PanelRightClose, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -200,17 +205,21 @@ export default function MeetingDetailPage({
       </div>
 
       {/* Content area: transcript + summary panel */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Transcript */}
-        <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden">
+        {showSummary ? (
+          <ResizablePanelGroup direction="horizontal" className="h-full">
+            <ResizablePanel defaultSize={60} minSize={30}>
+              <TranscriptPanel meetingId={id} />
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={40} minSize={25}>
+              <div className="h-full bg-card">
+                <SummaryPanel meetingId={id} />
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        ) : (
           <TranscriptPanel meetingId={id} />
-        </div>
-
-        {/* Summary panel sidebar */}
-        {showSummary && (
-          <div className="w-[380px] border-l border-border bg-card shrink-0">
-            <SummaryPanel meetingId={id} />
-          </div>
         )}
       </div>
 
