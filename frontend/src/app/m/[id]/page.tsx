@@ -16,7 +16,7 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import { ArrowLeft, Clock, Users, Loader2, PanelRightOpen, PanelRightClose, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Clock, Users, Loader2, PanelRightOpen, PanelRightClose, Pencil, Trash2, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -144,6 +144,14 @@ export default function MeetingDetailPage({
           </div>
           <div className="flex items-center gap-1">
             <ExportButton meetingId={id} />
+            <Link
+              href={`/m/${id}/chat`}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors border border-border"
+              title="Ask AI about this meeting"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-fireflies-yellow" />
+              <span className="hidden sm:inline">Ask AI</span>
+            </Link>
             <button
               onClick={() => setShowEdit(true)}
               className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
